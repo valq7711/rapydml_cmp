@@ -1,0 +1,118 @@
+RS = code_block( script(type = 'text/javascript'), 'rapydscript')
+#---------------------  demo-test.html ---------------   
+html:
+    head:
+        meta(charset='utf-8'):
+        link(rel="stylesheet" type="text/css" href= "grid.css"):
+        script(src='vue.js'):
+        script(src='grid.js'):
+        title:
+            "demo grid.js"
+    body:
+        div(id = "demo"):
+            form(id = "search"):
+                'Search'
+                input( name="query", v-model = "searchQuery"):
+
+            grid(   :data = "gridData", \
+                    :columns = "gridColumns", \
+                    :filter-key ="searchQuery"):
+
+    #--------------- bootstrup the demo --------------------
+    RS:
+        window.grid = new Vue({
+          el: '#demo',
+          delimiters : ['${','}'],
+          components: {'grid': my_vcs.grid()},
+          data: {
+            searchQuery: '',
+            gridColumns: ['name', 'power'],
+            gridData: [
+              { name: 'Chuck Norris', power: Infinity },
+              { name: 'Bruce Lee', power: 9000 },
+              { name: 'Jackie Chan', power: 7000 },
+              { name: 'Jet Li', power: 8000 }
+            ],
+          }
+        })
+
+#-------------------------  < TEMPLATES > ----------------------
+script( type = 'text/vuetemplate', id = "grid_template" ):
+    table():
+        thead():
+            tr():
+                th( v-for="key in columns", \ 
+                        @click="sortBy(key)", \
+                        :class="{ active: sortKey == key }"):
+                    '${ key | capitalize }'
+                    span( class="arrow", \
+                          :class="sortOrders[key] > 0 ? 'asc' : 'dsc'"):
+        tbody():
+            tr( v-for="entry in filteredData"):
+                td( v-for="key in columns"):
+                    '${entry[key]}'
+
+#----------------------  < RS_SCRIPT > -------------------------
+def get_grid_vc():
+    vc = {}
+    vc.delimiters = ['${','}']
+    vc.template = @TMPL(grid_template)
+    vc.props =  {
+        data: Array,
+        columns: Array,
+        filterKey: String
+    }
+    vc.data = def():
+        columns = this.columns
+        # using dict comprehension, but don't use `this` in it because it's function 
+        sortOrders = {col_name : 1 for col_name in columns}
+        return {  sortKey: '',
+                  sortOrders: sortOrders
+        }
+    vc.computed = {}  
+    vc.computed.filteredData = def():
+        sortKey = this.sortKey
+        filterKey = this.filterKey and this.filterKey.toLowerCase()
+        order = this.sortOrders[sortKey] or 1
+        data = this.data
+        if filterKey:
+            # using list comprehension
+            data = [row for row in data \
+                        if Object.keys(row).some(
+                            def(col): return filterKey in String(row[col]).toLowerCase();)]
+
+            # or more readable variant:
+            """
+            f_data = []
+            for row in this.data:
+                for col in row: 
+                    if filterKey in String(row[col]).toLowerCase():
+                        f_data.push(row) 
+            data =  f_data            
+            """
+        if sortKey:
+            data = data[:].sort( def(a, b):
+                a = a[sortKey]
+                b = b[sortKey]
+                if a == b:
+                    return 0
+                return (a > b and 1 or -1) * order
+            )
+        return data
+        
+    vc.filters = {}
+    vc.filters.capitalize = def(str):
+        return str[0].toUpperCase() + str[1:]
+    
+    vc.methods = {}
+    vc.methods.sortBy = def(key):
+        this.sortKey = key
+        this.sortOrders[key] = this.sortOrders[key] * -1
+    return vc 
+    
+def  main():
+    if not window.my_vcs:
+        window.my_vcs = {}
+    window.my_vcs.grid = get_grid_vc
+if __name__ = '__main__':
+    main()   
