@@ -12,7 +12,7 @@ Installation
 1. Replace `RapydML/rapydml/compiler.py` with one from this repo
 1. Put `rapydml_cmp.py, ml_cmp.conf`  in the root of RapydML
 1. Adjust the paths to `node` and `rapydscript` by editig ml_cmp.conf
-1. Append to the end of `RapydML/rapydml/markup/html` this line: `<*>+ *` - *it is rough solution that allows to use invalid html-tag like in `v_hello( :items = 'items'):` in `RapydML` templates. The strict way looks like  `<v_hello>+ *` - see [RapydML](https://github.com/atsepkov/RapydML) for more info.
+1. Append to the end of `RapydML/rapydml/markup/html` this line: `<*>+ *` - *it is rough solution that allows to use invalid html-tag like in `v_hello( :items = 'items'):` in `RapydML` templates. The strict way looks like  `<v_hello>+ *` - see [RapydML](https://github.com/atsepkov/RapydML) for more info.*
  
 
 Compilation
