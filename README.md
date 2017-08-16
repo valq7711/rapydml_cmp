@@ -43,7 +43,7 @@ html:
         div(id = 'container'):
             v_hello( :items = 'items'):
 
-    #--------------- demo bootstrap --------------------
+    #--------------- demo bootstrap rapydscript block -------------------
     RS:
         v_opt = {
             el : '#container', 
