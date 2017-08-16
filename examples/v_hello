@@ -1,0 +1,64 @@
+RS = code_block( script(type = 'text/javascript'), 'rapydscript')
+#---------------------  demo-test.html ---------------   
+html:
+    head:
+        meta(charset='utf-8'):
+        script(src='vue.js'):
+        script(src='v_hello.js'):
+        title:
+            "demo-test v_hello.js"
+    body:
+        div(id = 'container'):
+            v_hello( :items = 'items'):
+
+    #--------------- demo bootstrap --------------------
+    RS:
+        v_opt = {
+            el : '#container', 
+            data : {
+                items : [
+                            {id : 1, value : 'one'},
+                            {id : 2, value : 'two'},
+                            {id : 3, value : 'three'}
+                ]
+            },
+            components : {'v_hello': my_vcs.v_hello()},
+        }
+        window.v = new Vue(v_opt)
+
+#-------------------------  < TEMPLATES > ----------------------
+script( type = 'text/vuetemplate', id = "v_hello_tmpl" ):
+    div():
+        h4:
+            '${ header_d }'
+        div(v-for = 'it in items' , :id =  'it.id'):
+            '${ it.value }'
+        div():
+            'Count = ${items_count}'
+            
+#----------------------  < RS_SCRIPT > -------------------------
+def v_hello():
+    vc = {}
+    vc.template = @TMPL(v_hello_tmpl)
+    vc.delimiters = ['${','}']
+    vc.props =  {
+            items : Array,
+            header : String
+    }
+    vc.data = def(): return { header_d :  this.header or 'v_hello component'};
+
+    vc.computed = {}
+    vc.computed.items_count = def(): return len(this.items);
+    return vc    
+
+def main():
+    # To prevent flooding global namespace RapydScript wraps all code in a function
+    # so, we need to assign our component function to some global object
+    if not window.my_vcs:
+        window.my_vcs = {}
+    window.my_vcs.v_hello = v_hello
+    # or it may be just 
+    # Vue.component('v_hello', v_hello())  # it will be global component
+
+if __name__=='__main__':
+    main()
