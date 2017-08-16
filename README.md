@@ -28,7 +28,7 @@ it should produce 3 files (in the <cmp_file> directory):
 
 Getting Started
 ---------------
-Here is an example of a simple Vue component RapydScript/RapydML source code [v_hello](https://github.com/valq7711/rapydml_cmp/examples/v_hello)
+Here is an example of a simple Vue component RapydScript/RapydML source code [v_hello](https://github.com/valq7711/rapydml_cmp/blob/master/examples/v_hello)
 ```python
 RS = code_block( script(type = 'text/javascript'), 'rapydscript')
 #---------------------  demo-test.html ---------------   
