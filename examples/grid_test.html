@@ -1,0 +1,72 @@
+<html>
+    <head>
+        <meta charset='utf-8' />
+        <link rel="stylesheet" type="text/css" href= "grid.css" />
+        <script src='vue.js'>
+        </script>
+        <script src='grid.js'>
+        </script>
+        <title>
+            demo grid.js
+        </title>
+    </head>
+    <body>
+        <div style= "margin-bottom: 15px">
+            <a href = 'https://vuejs.org/v2/examples/grid-component.html'>
+                Vue original example
+            </a>
+        </div>
+        <div id = "demo">
+            <form id = "search">
+                Search
+                <input name="query" v-model = "searchQuery" />
+            </form>
+            <grid :data = "gridData" :columns = "gridColumns" :filter-key ="searchQuery">
+            </grid>
+        </div>
+    </body>
+    <script type = 'text/javascript'>
+(function(){
+"use strict";
+function ՐՏ_Iterable(iterable) {
+    var tmp;
+    if (iterable.constructor === [].constructor || iterable.constructor === "".constructor || (tmp = Array.prototype.slice.call(iterable)).length) {
+        return tmp || iterable;
+    }
+    return Object.keys(iterable);
+}
+
+(function(){
+
+    var __name__ = "__main__";
+
+    window.grid = new Vue({
+        el: "#demo",
+        delimiters: [ "${", "}" ],
+        components: {
+            "grid": my_vcs.grid()
+        },
+        data: {
+            searchQuery: "",
+            gridColumns: [ "name", "power" ],
+            gridData: [ {
+                name: "Chuck Norris",
+                power: Infinity
+            }, {
+                name: "Bruce Lee",
+                power: 9e3
+            }, {
+                name: "Jackie Chan",
+                power: 7e3
+            }, {
+                name: "Jet Li",
+                power: 8e3
+            } ]
+        }
+    });
+})();
+})();
+
+
+    </script>
+</html>
