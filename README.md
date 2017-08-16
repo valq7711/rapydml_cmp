@@ -66,8 +66,7 @@ def v_hello():
     return vc    
     
 def main():
-    # To prevent flooding global space RapydScript wraps all code in a function
-    # so, we need to assign our component function to some global object
+    # we need to assign our component function to some global object, since RapydScript wraps all code in a function
     if not window.my_vcs:
         window.my_vcs = {}
     window.my_vcs.v_hello = v_hello
