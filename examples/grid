@@ -24,7 +24,7 @@ html:
                     :columns = "gridColumns", \
                     :filter-key ="searchQuery"):
 
-    #--------------- bootstrup the demo --------------------
+    #--------------- bootstrap the demo --------------------
     RS:
         window.grid = new Vue({
           el: '#demo',
