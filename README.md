@@ -64,13 +64,17 @@ def v_hello():
     vc.computed = {}
     vc.computed.items_count = def(): return len(this.items);
     return vc    
-# To prevent flooding global space RapydScript wraps all code in a function
-# so, we need to assign our component function to some global object
-if not window.my_vcs:
-    window.my_vcs = {}
-window.my_vcs.v_hello = v_hello
-# or it may be just 
-# Vue.component('v_hello', v_hello())  # it will be global component
+    
+def main():
+    # To prevent flooding global space RapydScript wraps all code in a function
+    # so, we need to assign our component function to some global object
+    if not window.my_vcs:
+        window.my_vcs = {}
+    window.my_vcs.v_hello = v_hello
+    # or it may be just 
+    # Vue.component('v_hello', v_hello())  # it will be Vue-global component
+if __name__=='__main__':
+    main()    
 ```
 The code consits of three sections:
 1. From the begining to `#---< TEMPLATES >---` 
@@ -86,6 +90,5 @@ The **Second** section will be:
 
 The **Last** section will be:
   * searched for `@TMPL(awesome_id)` that will be replaced with corresponding `html-string`
-  * saved as `v_hello.pyj` - regular rapydscript file with embedded template that could be `imported` in another `file.pyj` or vue-component file like this one!     
-
+  * saved as `v_hello.pyj` - regular rapydscript file with embedded template that could be `imported` in another `file.pyj` or vue-component file like this one!
 
