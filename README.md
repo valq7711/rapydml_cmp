@@ -104,3 +104,5 @@ The **Last** section will be:
   * searched for `@TMPL(awesome_id)` that will be replaced with corresponding `html-string`
   * saved as `v_hello.pyj` - regular rapydscript file with embedded template that could be `imported` in another `file.pyj` or vue-component file like this one!
   * finally `v_hello.pyj` will be compiled to `v_hello.js` by RapydScript
+  
+  *to be continued ...*
