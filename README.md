@@ -13,6 +13,16 @@ Installation
 1. Put `rapydml_cmp.py, ml_cmp.conf`  in the root of RapydML
 1. Adjust the paths to `node` and `rapydscript` by editig ml_cmp.conf
 
+Compilation
+------------
+Just run 
+```python /path/to/rapydml_cmp.py <cmp_file>```
+it should produce 3 files (in the <cmp_file> directory):
+   *  <cmp_file>_test.html
+   *  <cmp_file>.pyj
+   *  <cmp_file>.js
+
+
 Getting Started
 ---------------
 Here is an example of a simple Vue component RapydScript/RapydML source code [v_hello](https://github.com/valq7711/rapydml_cmp/examples/v_hello)
@@ -90,4 +100,4 @@ The **Second** section will be:
 The **Last** section will be:
   * searched for `@TMPL(awesome_id)` that will be replaced with corresponding `html-string`
   * saved as `v_hello.pyj` - regular rapydscript file with embedded template that could be `imported` in another `file.pyj` or vue-component file like this one!
-
+  * Finally `v_hello.pyj` will be compiled to `v_hello.js` by RapydScript
