@@ -1,3 +1,4 @@
+#https://vuejs.org/v2/examples/grid-component.html
 RS = code_block( script(type = 'text/javascript'), 'rapydscript')
 #---------------------  demo-test.html ---------------   
 html:
@@ -9,6 +10,11 @@ html:
         title:
             "demo grid.js"
     body:
+        div(style= "margin-bottom: 15px"):
+            a(href = 'https://vuejs.org/v2/examples/grid-component.html'):
+                'Vue original example'
+        
+        #---- demo template starts here ----------            
         div(id = "demo"):
             form(id = "search"):
                 'Search'
