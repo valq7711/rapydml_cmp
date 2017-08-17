@@ -118,7 +118,7 @@ html:
             body:    # wrong indent!
 ```
 You can relax inside non-html blocks (like rapydscript or javascript), but don't cross the indentation boundary
-   * **Multi-Line tag definition should be gluing by `\` despite it is inside parentheses.** The following is allowed: 
+   * **Multi-Line tag definition should be glued by `\` despite it is inside parentheses.** The following is allowed: 
 ```python
 ...
    div( id= ...,  \
