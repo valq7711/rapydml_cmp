@@ -104,5 +104,34 @@ The **Last** section will be:
   * searched for `@TMPL(awesome_id)` that will be replaced with corresponding `html-string`
   * saved as `v_hello.pyj` - regular rapydscript file with embedded template that could be `imported` in another `file.pyj` or vue-component file like this one!
   * finally `v_hello.pyj` will be compiled to `v_hello.js` by RapydScript
-  
+
+Known issues
+------------
+### RapydML
+
+   * **Indentation is very strict**
+
+The indent increment should be the same almost everywhere, so this doesn't work:
+```
+html:
+   head:
+            body:    # wrong indent!
+```
+You can relax inside non-html blocks (like rapydscript or javascript), but don't cross the indentation boundary
+   * **Multi-Line tag definition should be gluing by `\` despite it is inside parentheses.** The following is allowed: 
+```python
+...
+   div( id= ...,  \
+@click  = ...):  # will be glued, so the indent doesn't matter
+```
+   * `$` **has special meaning**
+   
+RapydML accepts `$` as token of variable (see RapydML doc), use `\` to escape it. 
+```python
+   div( @click = 'on_click( \$event, some)'):  # $event - Vue variable, not RapydML, so it should be escaped
+   RS:
+      def():
+         $a = 12  # don't worry - it's inside code block 
+```
+
   *to be continued ...*
