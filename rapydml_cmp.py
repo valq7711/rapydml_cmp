@@ -78,7 +78,7 @@ def write_html_tst(ml_s, html_fname):
     """
     if not ml_s:  return
 
-    ml_lines = ml_s.splitlines()
+    ml_lines = ml_s.splitlines(True)
     html = get_parser(ml_lines[0])
     with open(html_fname, 'w') as output:
         output.write(html._parse(ml_lines))
@@ -89,7 +89,7 @@ def ml_templ_to_html(ml_s):
     """
     if not ml_s:  return ''
 
-    ml_lines = ml_s.splitlines()
+    ml_lines = ml_s.splitlines(True)
     html = get_parser(ml_lines[0])
     return html._parse(ml_lines)
 
