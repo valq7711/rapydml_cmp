@@ -30,11 +30,6 @@ html:
                 def component():
                     pass
 
-
-            @external
-            class Promise:
-                pass
-                
             def _get_rows(s, len, selected):
                 ret = []
                 e = s+len-1
