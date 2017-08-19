@@ -1,7 +1,4 @@
 RS = code_block(script(type='text/javascript'),'rapydscript') 
-asis = verbatim('','')
-#RactiveTempl_Start = verbatim('<script type="text/ractive">','')
-#RactiveTempl_End = verbatim('</script','')
 #--------------------- test_page --------------- 
 html:
     head:
@@ -10,15 +7,11 @@ html:
         link(rel="stylesheet" type="text/css" href= 'static/css/base.css'):
         link(rel="stylesheet" type="text/css" href= "static/css/ml_cmp.css"):
         script(src='vue.js'):
-        #script(src='underscore-min.js'):
-        #script(src='jquery-3.1.1.min.js'):
-        # component generated file.js
         script(src='grid.js'):
-        
     h1:
         "This is Header"
     title:
-        "Grid component test"
+        "Grid_infinite component test"
     body:
         div(style='position:relative; left:50px;'):
             div(id = "container"):                
@@ -28,8 +21,7 @@ html:
                             :scroll_to_row ='scroll_to_row', \
                             :rows_src="grid.rows", :rows_count = 25000,  :columns = "grid.columns",  \
                             :grid_settings = 'grid_settings'):
-            div():
-                'any text'
+
         #--------------- test script --------------------
         RS:
             @external
@@ -70,7 +62,6 @@ html:
                 ret = 100 - el.childNodes[0].getBoundingClientRect().width
                 doc.body.removeChild(el)
                 return ret
-                    
 
             tst = {
                 props : {
@@ -111,8 +102,6 @@ html:
                         },
                         roffset : 0,
                         scroll_to_row : 0,
-                        paginate : False,
-                        pg_no : 0,
                         grid_settings : {style:{width:'70%', height:'400px'}}
                 },
                 methods: {
