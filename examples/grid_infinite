@@ -1,12 +1,10 @@
 RS = code_block(script(type='text/javascript'),'rapydscript') 
-_style = verbatim('<style>','</style>')
 asis = verbatim('','')
 #RactiveTempl_Start = verbatim('<script type="text/ractive">','')
 #RactiveTempl_End = verbatim('</script','')
 #--------------------- test_page --------------- 
 html:
     head:
-        _style:
         meta(charset='utf-8'):
         link(rel="stylesheet" type="text/css" href= 'static/css/font-awesome.min.css'):
         link(rel="stylesheet" type="text/css" href= 'static/css/base.css'):
