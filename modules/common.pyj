@@ -1,0 +1,187 @@
+#common.pyj
+def format_num(format, num):        
+    sign_zer_dig = /^%?(\+)?(\d+)?\.(\d+)?f$/.exec(format)    
+    if sign_zer_dig:
+        flt_num = parseFloat(num)
+        sign =  flt_num<0 ? '-' : ( (sign_zer_dig[1] and flt_num>0 ) ? '+' : '')
+        flt_num  = Math.abs(flt_num)
+        if sign_zer_dig[3]:
+            flt_num = flt_num.toFixed(parseInt(sign_zer_dig[3]))
+        if sign_zer_dig[2]:    
+            zer = parseInt(sign_zer_dig[2])
+            flt_num = flt_num.toString()
+            dot_idx = flt_num.indexOf('.')
+            dot_idx =  dot_idx != -1 ? dot_idx: flt_num.length
+            if dot_idx != -1:
+                if (zer - dot_idx) >0:
+                        flt_num =  '0'.repeat(zer - dot_idx) + flt_num
+        flt_num = sign + flt_num                 
+        return(flt_num)
+    else:
+        raise Error('bad format: ' + format)
+    
+def SF(s, args):
+    #splitter = /(%%)|(%s)|(%\+?\d*\.\d*f)|(%\([a-zA-Z0-9_.]+\)s)|(%\([a-zA-Z0-9_.]+\)\+?\d*\.\d*f)/
+    splitter = /(%%)|(%(?:\([a-zA-Z0-9_.]+\))?(?:(?:s)|(?:\+?\d*\.\d*f)))/
+    arr = s.split(splitter)
+    cntr= 0
+    for i in range(arr.length):
+        if arr[i] and arr[i].startsWith('%'):
+            if arr[i] == '%%':
+                arr[i] = '%'
+            elif arr[i] == '%s':
+                arr[i] = args[cntr]
+                cntr += 1
+            elif arr[i].startsWith('%('):
+                name_format = /%\(([a-zA-Z0-9_.]+)\)(s|\+?\d*\.\d*f)/.exec(arr[i])
+                if name_format[2]=='s':
+                    arr[i] = args[name_format[1]]
+                else:
+                    arr[i] = format_num(name_format[2], args[name_format[1]])
+            elif /%(\+)?(\d+)?\.(\d+)?f/.test(arr[i]):
+                arr[i] = format_num(arr[i], args[cntr])
+                cntr += 1
+            else:
+                raise Error('bad format: ' + arr[i])
+                
+    return(arr.join(''))        
+
+    
+#--------------------   react ---------------------------
+
+def _reg_as(name_or_fun, reg_as):
+    _name = None
+    _reg_as  = reg_as
+    _inner_ = def(f):
+                f[_reg_as] = _name or f.name
+                return(f)
+    if isinstance( name_or_fun, Function):
+        #print('name_or_fun', name_or_fun)
+        return _inner_(name_or_fun)
+    _name = name_or_fun
+    return(_inner_)
+
+    
+
+def v_meth(name_or_fun):
+    return _reg_as(name_or_fun, '_vue_meth')
+
+def v_computed(name_or_fun):
+    return _reg_as(name_or_fun, '_vue_computed')
+
+def v_watch(name_or_fun):
+    return _reg_as(name_or_fun, '_vue_watch')
+
+def v_rstore_getter(name_or_fun):
+    return _reg_as(name_or_fun, '_vue_rstore_getter')
+
+def v_rstore_mutation(name_or_fun):
+    return _reg_as(name_or_fun, '_vue_rstore_mutation')    
+
+def v_rstore_action(name_or_fun):
+    return _reg_as(name_or_fun, '_vue_rstore_action')        
+
+
+    
+def v_collect(from_obj, to_obj, map, redefine):    
+    #map = {_vue_meth: 'methods',  ...}
+    for k in Object.getOwnPropertyNames(from_obj):
+        for reg_attr in map: 
+            reg_name = from_obj[k][reg_attr]
+            if reg_name:
+                hash_name = map[reg_attr]
+                if not to_obj[hash_name]:
+                    to_obj[hash_name] = {}
+                if to_obj[hash_name][reg_name] == undefined or redefine:
+                    to_obj[hash_name][reg_name] = from_obj[k]
+                else:
+                    raise Error('"' + reg_name + '" already exists in "' + hash_name + '", try v_collect(..., redefine = true)' )
+                break
+        
+    
+#-------------------------------------------RS_react-------------------
+
+class RS_react:
+    _map_attr_ = {
+            _vue_meth: 'methods', 
+            _vue_computed: 'computed',
+            _vue_watch: 'watch',
+            _vue_rstore_mutation: 'mutations',
+            _vue_rstore_action: 'actions'
+    }
+    
+    def __init__(self):
+        self.data = self.data or self._init_data
+        self.methods = self.methods or {}
+        self.computed = self.computed or {}
+        self.props = self.props or {}
+        self.watch = self.watch or {}
+
+        #register methods, computed ...
+        v_collect(self.__proto__, self, self._map_attr_ )
+        self_keys = Object.keys(self)
+        for v_spec in [ 'beforeCreate','created', 
+                        'beforeMount', 'mounted',
+                        'beforeUpdate', 'updated',
+                        'activated', 'deactivated',
+                        'beforeDestroy', 'destroyed']:
+            if !self_keys[v_spec] and (tmp = self.__proto__[v_spec]):
+                self[v_spec] = tmp
+        
+    def _init_data(self):
+        data = {}
+        return data
+
+#--------------------------------------------------------Drag_listener------
+
+class Drag_listener:
+    def __init__(self, catcher):
+        self.catcher = catcher
+        self.x0 = 0
+        self.y0 = 0
+        self.vc = None
+        self.listeners = {}
+   
+    def get_mousedn_listener(self):
+        def _inner_(e):
+            self.vc = this
+            self.x0 = e.clientX
+            self.y0 = e.clientY
+            if not self.catcher:
+                self.catcher =  def(what, e, args): 
+                                    self.vc.$emit(what, e, args)
+            if not ('move' in self.listeners):
+                self.listeners= {move: self.mousemove(), up: self.mouseup()}
+            listeners =  self.listeners 
+            document.addEventListener( 'mousemove', listeners.move, False )
+            document.addEventListener( 'mouseup', listeners.up, False )
+            e.stopPropagation()
+            e.preventDefault()
+            #self.vc.$emit('drag_start', e, {x0: self.x0, y0: self.y0, vc: self.vc})
+            self.catcher('drag_start', e, {x0: self.x0, y0: self.y0, vc: self.vc})
+        self.listeners.dn = _inner_    
+        return _inner_
+    
+    def mousemove(self):
+        def _inner_(e):
+                self.dx = e.clientX - self.x0
+                self.dy = e.clientY - self.y0
+                e.stopPropagation()
+                e.preventDefault()
+                self.catcher('drag_move' , e, {dx: self.dx, dy: self.dy, vc: self.vc})
+        return _inner_    
+    
+    def mouseup(self):
+        def _inner_(e):
+            document.removeEventListener( 'mousemove', self.listeners.move)
+            document.removeEventListener( 'mouseup', self.listeners.up)
+            e.stopPropagation()
+            e.preventDefault()
+            self.catcher('drag_stop' , e, {dx: self.dx, dy: self.dy, vc: self.vc})
+        return _inner_    
+        
+    @staticmethod
+    def get_listener(catcher):
+        obj = Drag_listener(catcher)
+        return obj.get_mousedn_listener()
+        
