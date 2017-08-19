@@ -1,0 +1,505 @@
+RS = code_block(script(type='text/javascript'),'rapydscript') 
+_style = verbatim('<style>','</style>')
+asis = verbatim('','')
+#RactiveTempl_Start = verbatim('<script type="text/ractive">','')
+#RactiveTempl_End = verbatim('</script','')
+#--------------------- test_page --------------- 
+html:
+    head:
+        _style:
+        meta(charset='utf-8'):
+        link(rel="stylesheet" type="text/css" href= 'static/css/font-awesome.min.css'):
+        link(rel="stylesheet" type="text/css" href= 'static/css/base.css'):
+        link(rel="stylesheet" type="text/css" href= "static/css/ml_cmp.css"):
+        script(src='vue.js'):
+        #script(src='underscore-min.js'):
+        #script(src='jquery-3.1.1.min.js'):
+        # component generated file.js
+        script(src='grid.js'):
+        
+    h1:
+        "This is Header"
+    title:
+        "Grid component test"
+    body:
+        div(style='position:relative; left:50px;'):
+            div(id = "container"):                
+                my-grid(v-if = "grid", :rows_offset= "roffset", \
+                            @load = 'on_load', @click_row = 'on_click', \
+                            @scrolled = 'on_scrolled',  \
+                            :scroll_to_row ='scroll_to_row', \
+                            :rows_src="grid.rows", :rows_count = 25000,  :columns = "grid.columns",  \
+                            :grid_settings = 'grid_settings'):
+            div():
+                'any text'
+        #--------------- test script --------------------
+        RS:
+            @external
+            class Vue:
+                @staticmethod
+                def component():
+                    pass
+
+
+            @external
+            class Promise:
+                pass
+                
+            def _get_rows(s, len, selected):
+                ret = []
+                e = s+len-1
+                e = e < 25000 ? e :24999
+                for i in range(s,e+1):
+                    msg = i
+                    msg= '<div style="height:'+ i%83  +  ';">' + i + '</div>'
+                    r = {'f1': 'col1 value'+ i, 'f2': 'col2 value'+ msg, 'f3': 'col3 value'+ i}
+                    if selected['r'+i]:
+                        r.selected=True
+                    if i%20==0:
+                        r.component = 'tst'
+                        r.cmp_args = def(cmp, cols, index):
+                            return {columns: cols, index: index}
+                    ret.push(r)
+                return ret
+            def get_scroll_w():
+                doc = document
+                el = doc.createElement('div')
+                #el.style.display='none'
+                el.style.overflowY='scroll'
+                el.style.width='100px'
+                el.innerHTML = '<div style="width:100%">aa</div>'
+                doc.body.appendChild(el)
+                ret = 100 - el.childNodes[0].getBoundingClientRect().width
+                doc.body.removeChild(el)
+                return ret
+                    
+
+            tst = {
+                props : {
+                    columns: Array,
+                    index: Number
+                },
+                template : """<tr><td :colspan="2"> col_name = {{columns[0].name}}, index ={{index}} </td>""" + \
+                           """<td> col_name = {{columns[0].name}}, index ={{index}} </td></tr>""" 
+            }
+            
+            tst_col = {
+                props : {
+                    columns: Array,
+                    index: Number,
+                    name : String
+                },
+                template : """<button> col_name = {{name}}, index ={{index}}, columns_len = {{columns.length}} </button>"""
+            }    
+            Vue.component('tst', tst)
+            Vue.component('tst_col', tst_col)
+            Vue.component('my-grid', val_widgets.grid.make())
+            window.selected = {selected : {'r5' : True}}
+            Vue({data : selected})
+            v_opt = {
+                el : '#container', 
+                data : { 
+                    grid : { 
+                        columns : [
+                            {name : 'qq', html: '<div style="color:red">qq</div>', field: 'f1', width:'100px'}, 
+                            {name : 'col2', 
+                                field : 'f2', 
+                                component : 'tst_col', 
+                                cmp_args : def(cmp, cols, index): return {columns: cols, index: index, name: cols[index].name};
+                            }, 
+                            {name :'col3', field :'f3', width :'100px'}
+                        ],
+                        rows: def(s,l): return _get_rows(s,l, selected.selected);
+                        },
+                        roffset : 0,
+                        scroll_to_row : 0,
+                        paginate : False,
+                        pg_no : 0,
+                        grid_settings : {style:{width:'70%', height:'400px'}}
+                },
+                methods: {
+                    on_scrolled: def(row_no):
+                        # reset scroll
+                        this.scroll_to_row = -1;
+                    ,
+                    on_load: def(off, row_no):
+                                if off == 'top':
+                                    this.roffset = 0
+                                    this.scroll_to_row = 0
+                                elif off == 'bottom':    
+                                    this.roffset = 25000-50
+                                    this.scroll_to_row = 24999
+                                elif off == 'scroll_to':    
+                                    this.roffset = row_no > 50 ? row_no-50 : 0
+                                    this.scroll_to_row = row_no    
+                                else:
+                                    this.roffset = off
+                                    this.scroll_to_row = -1;
+                    ,
+                    on_click: def(idx, row):
+                        this.$set(selected.selected, 'r'+idx, !selected.selected['r'+idx]);
+                }            
+            }
+            v = Vue(v_opt)
+            window.v = v
+            window.get_scroll_w = get_scroll_w
+            
+#------------------------- < TEMPLATES > ----------------------
+css(store_in = 'static/css/ml_cmp.css'):
+    div.vl-grid-container{
+        box-shadow: 0px 0px 10px black;
+        border-radius: 3px;
+    }
+
+    table.vl-grid {
+        width : 100%;
+        table-layout : fixed
+    }
+    table.vl-grid, th.vl-grid, td.vl-grid {
+        border :  1px  solid lightgray;
+        border-collapse : collapse;
+        -webkit-user-select : none;
+        user-select : none;
+    }
+    td.vl-grid *, th.vl-grid * {
+        overflow : hidden;
+        text-overflow : ellipsis;
+        white-space  : nowrap;
+    }
+
+    .vl-grid-content {
+        overflow-Y : scroll; 
+        margin-top :  -1px;    
+        outline :  None; 
+    }
+    
+    .vl-grid-head{
+        width :  100%; 
+    }
+    .vl-grid-head th{
+        width :  100%; 
+        border :  1px  solid white;
+        background-color: lightgray;
+        color: black;
+    }
+
+    tr.vl-grid-hidden{ 
+        padding-top : 0px;
+        padding-bottom : 0px;
+        border-top-style : hidden;
+        line-height : 0px;
+    }
+
+    tr.vl-grid-hidden>th{
+        height: 0px;
+    }
+    tr.vl-grid-selected{
+        background-color: lightyellow;
+    }
+    div.vl-grid-footer{
+        background-color: lightgray;
+        color: black;
+        padding: 4px;
+    }
+            
+
+script(type='text/vuetempl',id="templ" ):
+    div(class='vl-grid-container', :style='grid_div_style'):
+        div(class='vl-grid-head', ref = 'thead_div' ):
+            table(class='vl-grid'):
+                thead(class='vl-grid'):
+                    tr(class='vl-grid'):
+                        th(v-for ="(col, index) in columns", \
+                                class='vl-grid', \
+                                :style = '{width: col.width}'):
+                            component(v-if = "col.component", :is = "col.component", v-bind = "col.cmp_args(col.component, columns, index)"):
+                            template(v-else-if = "col.html"):
+                                div(v-html = "col.html"):
+                            template(v-else):
+                                div(v-text = "col.name"):
+                                
+                                    
+        div( class='vl-grid-content', \
+                :style='content_div_style', \
+                @scroll = "on_scroll(\$event)",  \
+                @keyup.36.35 = "on_ctrl_home_end(\$event)", \
+                ref = "rows_container", tabindex = 0 ):
+            table( class='vl-grid vl-grid-content',  ref = 'table'):
+                thead(class='vl-grid'):
+                    tr(class='vl-grid-hidden'):
+                        th(v-for ="col in columns", :style='{width : col.width}', class='vl-grid'):
+                            ''
+                tbody(ref="tbl"):
+                    tr(v-if ="show_loading.up", :style = "{height : spinner_row_h}"):
+                        td(:colspan="columns.length", class='vl-grid'):
+                            div(style='text-align:center; font-size:20px'):        
+                                i(class="fa fa-refresh  fa-spin fa-fw"):
+                    tr( v-for ="(row, index) in rows", \
+                            :is = "row.component || 'tr'",  :id="'r' + (rows_offset + index)",   \ 
+                            :class = "{'vl-grid-selected': row.selected}", \
+                            @click = "on_click(index + rows_offset, row)", \
+                            @click.native = "on_click(index + rows_offset, row)", \
+                            v-bind = "row.component && row.cmp_args(row.component, columns, rows_offset+index)"):
+                        td(v-if = '!row.component', \
+                                v-for ="col in columns", class='vl-grid'):
+                            div(v-html = row[col.field]):
+                    tr(v-if ="show_loading.dn"):
+                        td(:colspan="columns.length", class='vl-grid'):
+                            div(style='text-align:center; font-size:20px'):        
+                                i(class="fa fa-refresh  fa-spin fa-fw"):
+
+        div( class='vl-grid-footer', ref = 'footer_div'):
+            'Current range: {{rows_offset}} - {{rows_last_idx}}'
+                    
+#---------------------- < RS_SCRIPT > -------------------------
+
+from common import v_meth, v_computed, v_watch, RS_react
+@external
+class Vue:
+    @staticmethod
+    def component():
+        pass
+
+class Grid(RS_react):
+    def __init__(self, options):
+        RS_react.__init__(self)
+        self.template = options.template
+        self.props= { 
+                        columns : Array , # columns.name
+                        rows_src : Function,
+                        rows_count : Number,
+                        rows_offset : {type: Number, default : 0},
+                        scroll_to_row : {type: Number, default : 0},
+                        cluster_sz : {type: Number, default : 20},
+                        cluster_cache: {type: Number, default : 5},
+                        spinner_row_h: {type: Number, default : 30},
+                        grid_settings:  { type: Object, 
+                                          default: def(): return { style : {width : '50%'}};
+                        }
+                }
+
+    def _init_data(self):
+        hiddata = {}
+        hiddata.scroll_top = 0
+        hiddata.scroll_top_was = 0 
+        hiddata.scroll_dir = ''
+        hiddata.upd_width = self.get_upd_width_listener()
+        hiddata.scroll_ignore = False
+        return {    grid_div_h: 0, 
+                    thead_div_h: 0,
+                    footer_div_h: 0,
+                    hiddata : hiddata
+                }
+
+    @v_computed
+    def cache_len(self): 
+        return  self.cluster_sz*self.cluster_cache 
+
+    @v_computed
+    def rows(self): 
+        return( self.rows_src(self.rows_offset, self.cache_len)) 
+
+    @v_computed
+    def rows_last_idx(self):
+        tmp= self.rows_offset + self.cache_len
+        return tmp < self.rows_count ? tmp : self.rows_count - 1
+
+    @v_computed
+    def show_loading(self):        
+        return {up : self.rows_offset > 0 , 
+                dn : (self.rows_offset + self.rows.length) < self.rows_count}
+    
+    @v_computed
+    def grid_div_style(self):
+        return {
+                    width: self.grid_settings.style.width, 
+                    height: self.grid_settings.style.height
+               }
+    
+    @v_computed
+    def content_div_style(self): 
+        h = (self.grid_div_h - self.thead_div_h - self.footer_div_h + 1) or \
+                self.grid_settings.style.height
+        return {height: h}
+   
+
+    @v_meth
+    def on_click(self, idx, row):
+        print('click')
+        self.$emit('click_row', idx, row)
+
+    @v_meth
+    def get_upd_width_listener(self): 
+        _self=self
+        upd_width = def():
+            w = _self.$refs.table.getBoundingClientRect().width
+            _self.$refs.thead_div.style.width = w
+            _self.thead_div_h = _self.$refs.thead_div.getBoundingClientRect().height
+            _self.footer_div_h = _self.$refs.footer_div.getBoundingClientRect().height
+            _self.grid_div_h = _self.$el.getBoundingClientRect().height
+        return upd_width
+    
+    @v_meth
+    def client_rect(self, el):
+        return (el.$el or el).getBoundingClientRect()
+
+    @v_meth
+    def el_row(self, idx):
+        return self.hiddata.rows[idx + (self.show_loading.up ? 1 : 0 )] 
+
+    @v_meth
+    def get_rows_h(self, up, dn): 
+        if  up >= dn or dn==0:
+            return(0)
+        ret_h = 0
+        while up < dn:
+            ret_h += self.el_row(up).getBoundingClientRect().height
+            up += 1
+        return(ret_h)
+
+    @v_meth
+    def on_ctrl_home_end(self, e): 
+        if e.ctrlKey: 
+            if e.keyCode == 36: #home
+                self.$emit('load','top')
+            else: #end
+                self.$emit('load','bottom')
+
+    @v_meth
+    def on_scroll(self):
+        if self.hiddata.scroll_ignore:
+            self.hiddata.scroll_ignore = False
+            return 
+        if self.cache_len >=  self.rows_count:
+            return
+        me = self.on_scroll
+        # debounce load   
+        _self = self
+        if me.scroll_end_handler: 
+            clearTimeout(me.scroll_end_handler)
+            me.scroll_end_handler = setTimeout(def(): _self.process_scroll();, 250)
+        else:
+            me.scroll_end_handler = setTimeout(def(): _self.process_scroll();, 250)
+
+    @v_meth
+    def  process_scroll(self): 
+        self.on_scroll.scroll_end_handler = None
+        r_idx = self.get_first_visible_rowidx()
+        cluster_sz = self.cluster_sz
+        if r_idx > cluster_sz*3: 
+            off = self.rows_offset + cluster_sz
+            if off > (tmp = ( self.rows_count- self.cluster_sz)):
+                off = tmp
+            self.$emit('load', off)
+        elif r_idx < cluster_sz and self.rows_offset > 0: 
+            off = self.rows_offset - cluster_sz
+            self.$emit('load', off >= 0 ? off : 0 )    
+
+    @v_meth
+    def get_first_visible_rowidx(self):
+        container_top = self.$refs.rows_container.getBoundingClientRect().top    
+        rows = self.hiddata.rows 
+        up = 0
+        dn = rows.length-1
+        while dn-up > 2:
+            cur_index = parseInt((up+dn)/2)
+            is_visible = self.el_row(cur_index).getBoundingClientRect().bottom-container_top >= 0
+            if  is_visible:
+                dn = cur_index
+            else:
+                up = cur_index
+        cur_index = dn
+        while cur_index>=0:
+            is_visible = self.el_row(cur_index).getBoundingClientRect().bottom-container_top >= 0
+            if  not is_visible:
+                cur_index+=1
+                break
+            cur_index-=1
+        ret = cur_index
+        return(ret)
+   
+    @v_meth
+    def is_visible(self, ridx, full):
+        container = self.$refs.rows_container.getBoundingClientRect()    
+        row = self.el_row(ridx).getBoundingClientRect() 
+        limits = ['bottom', 'top'] 
+        if full:
+            limits.reverse()
+        is_visible = row[limits[0]] >= container.top
+        return is_visible & row[limits[1]] <= container.bottom
+        
+
+    @v_meth
+    def scroll_to(self, row_no, full):
+        if row_no < 0 or row_no >= self.rows_count:
+            console.warn('can`t scroll to row #' +  row_no)
+            return 
+        if self.rows_offset <= row_no and \
+           row_no < (self.rows_offset + self.cache_len):
+            idx = row_no - self.rows_offset
+            #self.$refs.el_rows[idx].scrollIntoViewIfNeeded()
+            if not self.is_visible(idx, full):
+                self.el_row(idx).scrollIntoView()
+            self.$emit('scrolled', row_no)
+        else:
+            self.$emit('load','scroll_to', row_no)
+
+    @v_watch                
+    def grid_settings(self):
+        self.$nextTick(self.hiddata.upd_width)
+                    
+    @v_watch                
+    def rows_offset(self, offset, offset_was):
+        hiddata = self.hiddata
+        if self.scroll_to_row < 0:
+            hiddata.scroll_dir = offset < offset_was? 'up':'dn'
+            if  hiddata.scroll_dir == 'dn':
+                cluster_h_was = self.get_rows_h(0, offset - offset_was)
+                dlt = offset_was==0 ? self.spinner_row_h : 0
+                hiddata.scroll_top =  self.$refs.rows_container.scrollTop - cluster_h_was + dlt
+            else:
+                hiddata.scroll_top = self.$refs.rows_container.scrollTop
+        else:    
+            hiddata.scroll_dir = '';
+   
+    def beforeUpdate(self):
+        self.hiddata.scroll_top_was = self.$refs.rows_container.scrollTop
+
+    def updated(self): 
+        hiddata = self.hiddata
+        if not hiddata.rows:
+            hiddata.rows = self.$refs.tbl.getElementsByTagName('tr') # live (reactive) collection
+        if self.scroll_to_row >= 0: 
+            self.scroll_to(self.scroll_to_row)
+        else:
+            if hiddata.scroll_dir == '':
+                hiddata.scroll_ignore = True
+                self.$nextTick(def(): this.$refs.rows_container.scrollTop = hiddata.scroll_top_was;)
+            elif hiddata.scroll_dir=='up':
+                self.$refs.rows_container.scrollTop = hiddata.scroll_top + (self.get_rows_h(0, self.cluster_sz))
+            elif hiddata.scroll_dir=='dn':
+                self.$refs.rows_container.scrollTop = hiddata.scroll_top
+            hiddata.scroll_dir = ''
+    
+    def mounted(self): 
+        upd_width = self.hiddata.upd_width
+        upd_width()
+        window.addEventListener('resize', upd_width)
+    
+    def beforeDestroy(self): 
+        window.removeEventListener('resize', self.hiddata.upd_width)
+
+    @staticmethod
+    def make(options):
+        options = options or {}
+        if not options.template:
+            options.template = @TMPL(templ)
+        obj = Grid(options)
+        return obj
+        
+def main():
+    window.val_widgets = window.val_widgets or {}
+    window.val_widgets['grid'] = Grid
+    
+if __name__=='__main__':
+    main()    
