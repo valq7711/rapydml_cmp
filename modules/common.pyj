@@ -125,7 +125,7 @@ class RS_react:
                         'beforeUpdate', 'updated',
                         'activated', 'deactivated',
                         'beforeDestroy', 'destroyed']:
-            if !self_keys[v_spec] and (tmp = self.__proto__[v_spec]):
+            if !(v_spec in self_keys) and (tmp = self.__proto__[v_spec]):
                 self[v_spec] = tmp
         
     def _init_data(self):
