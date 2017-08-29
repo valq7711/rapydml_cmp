@@ -24,7 +24,7 @@ def SF(s, args):
     #splitter = /(%%)|(%s)|(%\+?\d*\.\d*f)|(%\([a-zA-Z0-9_.]+\)s)|(%\([a-zA-Z0-9_.]+\)\+?\d*\.\d*f)/
     splitter = /(%%)|(%(?:\([a-zA-Z0-9_.]+\))?(?:(?:s)|(?:\+?\d*\.\d*f)))/
     arr = s.split(splitter)
-    cntr= 0
+    cntr = 0
     for i in range(arr.length):
         if arr[i] and arr[i].startsWith('%'):
             if arr[i] == '%%':
@@ -43,7 +43,6 @@ def SF(s, args):
                 cntr += 1
             else:
                 raise Error('bad format: ' + arr[i])
-                
     return(arr.join(''))        
 
     
@@ -60,8 +59,6 @@ def _reg_as(name_or_fun, reg_as):
         return _inner_(name_or_fun)
     _name = name_or_fun
     return(_inner_)
-
-    
 
 def v_meth(name_or_fun):
     return _reg_as(name_or_fun, '_vue_meth')
@@ -111,11 +108,11 @@ class RS_react:
     }
     
     def __init__(self):
-        self.data = self.data or self._init_data
-        self.methods = self.methods or {}
-        self.computed = self.computed or {}
-        self.props = self.props or {}
-        self.watch = self.watch or {}
+        self.data = self._init_data
+        self.methods = {}
+        self.computed = {}
+        self.props = {}
+        self.watch = {}
 
         #register methods, computed ...
         v_collect(self.__proto__, self, self._map_attr_ )
@@ -129,8 +126,8 @@ class RS_react:
                 self[v_spec] = tmp
         
     def _init_data(self):
-        data = {}
-        return data
+        raise ReferenceError('Not implemented')
+
 
 #--------------------------------------------------------Drag_listener------
 
