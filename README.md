@@ -133,13 +133,89 @@ RapydML accepts `$` as token of variable (see RapydML doc), use `\` to escape it
       def():
          $a = 12  # don't worry - it's inside code block 
 ```
-### RapydML
+### RapydScript
 Keep in mind that RapydScript is still JS, not  Python. You should study JS-fundamentals and RS-documentation in details.
 There is only a pair of tens issues at the moment *(and only some of them are real bugs)*, so you can explore [them](https://github.com/atsepkov/RapydScript/issues) yourself.
 
 Python style
 ------------
-One of the most impressive features of RapydScript is the classes, why not use them to define the vue component?
 
+One of the most impressive features of RapydScript is the classes, why not use them to define the Vue component?  
+Let's have a look at:
 
+```python
+...
+    #--------------- demo bootstrap rapydscript block -------------------
+    RS:
+...
+            components : {'v_hello': my_vcs.v_hello.make()},
+...
+#----------------------  < RS_SCRIPT > -------------------------
+
+class V_hello:
+    def __init__(self):
+        self.template = @TMPL(v_hello_tmpl)
+        self.delimiters = ['${','}']
+        self.props =  {
+            items : Array,
+            header : String
+        }
+        self.data = self._init_data
+        computed = self.computed = {}
+        computed.items_count = self.items_count
+    
+    def _init_data(self):
+        return { header_d : self.header or 'v_hello component'}
+
+    def items_count(self):
+        return len(self.items)
+
+    # if you're true ghostbuster then omit this method   
+    @staticmethod
+    def make():
+        return V_hello()
+
+def main():
+    if not window.my_vcs:
+        window.my_vcs = {}
+    window.my_vcs.v_hello = V_hello 
+    # Now, we can feed Vue with one of the equivalent variants:
+    # - my_vcs.v_hello.make() 
+    # - new my_vcs.v_hello()
+
+if __name__=='__main__':
+    main()    
+```
+This is more familiar for pythonic eyes,  but not quite DRY, because we have to do the stuff like:
+```python
+computed = self.computed = {}
+computed.items_count = self.items_count
+```
+Let @decorators do it!:
+```python
+...
+#----------------------  < RS_SCRIPT > -------------------------
+from common import v_computed, RS_react
+
+class V_hello(RS_react):
+    def __init__(self):
+        # !!! ES6 issue:  in fact, `self` (i.e. `this`) doesn't exist yet !!! 
+        # reference `this` is allowed only after `super()` - i.e. `Base_class.__init__()` - call:  
+        RS_react.__init__(self) 
+        self.template = @TMPL(v_hello_tmpl)
+        self.delimiters = ['${','}']
+        self.props =  {
+            items : Array,
+            header : String
+        }
+    
+    def _init_data(self):
+        return { header_d : self.header or 'v_hello component'}
+
+    @v_computed
+    def items_count(self):
+        return len(self.items)
+...
+```
+Much better, isn't it?  
   *to be continued ...*
