@@ -133,5 +133,13 @@ RapydML accepts `$` as token of variable (see RapydML doc), use `\` to escape it
       def():
          $a = 12  # don't worry - it's inside code block 
 ```
+### RapydML
+Keep in mind that RapydScript is still JS, not  Python. You should study JS-fundamentals and RS-documentation in details.
+There is only a pair of tens issues at the moment *(and only some of them are real bugs)*, so you can explore [them](https://github.com/atsepkov/RapydScript/issues) yourself.
+
+Python style
+------------
+One of the most impressive features of RapydScript is the classes, why not use them to define the vue component?
+
 
   *to be continued ...*
