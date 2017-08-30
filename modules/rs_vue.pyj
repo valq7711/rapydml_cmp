@@ -1,0 +1,87 @@
+#rs_vue.pyj
+
+#------------ universal tricky @decorator ------------------
+
+def _reg_as(name_or_fun, reg_as):
+    _name = None
+    _reg_as  = reg_as
+    _inner_ = def(f):
+                f[_reg_as] = _name or f.name
+                return(f)
+    if isinstance( name_or_fun, Function):
+        return _inner_(name_or_fun)
+    _name = name_or_fun
+    return(_inner_)
+
+#------------ @v_<decorators> ------------------
+# usage: @v_meth  or  @v_meth('alias_name')
+
+def v_meth(name_or_fun):
+    return _reg_as(name_or_fun, '_vue_meth')
+
+def v_computed(name_or_fun):
+    return _reg_as(name_or_fun, '_vue_computed')
+
+def v_filter(name_or_fun):
+    return _reg_as(name_or_fun, '_vue_filter')
+
+def v_watch(name_or_fun):
+    return _reg_as(name_or_fun, '_vue_watch')
+
+def v_rstore_getter(name_or_fun):
+    return _reg_as(name_or_fun, '_vue_rstore_getter')
+
+def v_rstore_mutation(name_or_fun):
+    return _reg_as(name_or_fun, '_vue_rstore_mutation')    
+
+def v_rstore_action(name_or_fun):
+    return _reg_as(name_or_fun, '_vue_rstore_action')        
+    
+def v_collect(from_obj, to_obj, map, redefine):    
+    #map = {_vue_meth: 'methods',  ...}
+    for k in Object.getOwnPropertyNames(from_obj):
+        for reg_attr in map: 
+            reg_name = from_obj[k][reg_attr]
+            if reg_name:
+                hash_name = map[reg_attr]
+                if not to_obj[hash_name]:
+                    to_obj[hash_name] = {}
+                if to_obj[hash_name][reg_name] == undefined or redefine:
+                    to_obj[hash_name][reg_name] = from_obj[k]
+                else:
+                    raise Error('"' + reg_name + '" already exists in "' + hash_name + '", try v_collect(..., redefine = true)' )
+                break
+
+#-------------------RS_vue-------------------
+# simple class that collects all and converts to Vue-suitable obj
+
+class RS_vue:
+    _map_attr_ = {
+            _vue_meth: 'methods', 
+            _vue_computed: 'computed',
+            _vue_watch: 'watch',
+            _vue_filter: 'filters',
+            _vue_rstore_mutation: 'mutations',
+            _vue_rstore_action: 'actions'
+    }
+    
+    def __init__(self):
+        self.data = self._init_data
+        self.methods = {}
+        self.computed = {}
+        self.props = {}
+        self.watch = {}
+
+        #register methods, computed ...
+        v_collect(self.__proto__, self, self._map_attr_ )
+        self_keys = Object.keys(self)
+        for v_spec in [ 'beforeCreate','created', 
+                        'beforeMount', 'mounted',
+                        'beforeUpdate', 'updated',
+                        'activated', 'deactivated',
+                        'beforeDestroy', 'destroyed']:
+            if !(v_spec in self_keys) and (tmp = self.__proto__[v_spec]):
+                self[v_spec] = tmp
+        
+    def _init_data(self):
+        raise ReferenceError('Not implemented')
