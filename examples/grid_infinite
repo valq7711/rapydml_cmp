@@ -235,16 +235,16 @@ script(type='text/vuetempl',id="templ" ):
                     
 #---------------------- < RS_SCRIPT > -------------------------
 
-from common import v_meth, v_computed, v_watch, RS_react
+from rs_vue import v_meth, v_computed, v_watch, RS_vue
 @external
 class Vue:
     @staticmethod
     def component():
         pass
 
-class Grid(RS_react):
+class Grid(RS_vue):
     def __init__(self, options):
-        RS_react.__init__(self)
+        RS_vue.__init__(self)
         self.template = options.template
         self.props= { 
                         columns : Array , # columns.name
