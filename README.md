@@ -195,9 +195,9 @@ Let @decorators do it!:
 ```python
 ...
 #----------------------  < RS_SCRIPT > -------------------------
-from common import v_computed, RS_react
+from rs_vue import v_computed, RS_vue
 
-class V_hello(RS_react):
+class V_hello(RS_vue):
     def __init__(self):
         # !!! ES6 issue:  in fact, `self` (i.e. `this`) doesn't exist yet !!! 
         # reference `this` is allowed only after `super()` - i.e. `Base_class.__init__()` - call:  
