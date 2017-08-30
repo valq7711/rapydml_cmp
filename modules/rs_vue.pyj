@@ -26,6 +26,10 @@ def v_filter(name_or_fun):
     return _reg_as(name_or_fun, '_vue_filter')
 
 def v_watch(name_or_fun):
+    if isinstance(name_or_fun, Function):
+        name = name_or_fun.name.split('$w_')[1]
+        if name:
+            return _reg_as(name, '_vue_watch')(name_or_fun)
     return _reg_as(name_or_fun, '_vue_watch')
 
 def v_rstore_getter(name_or_fun):
