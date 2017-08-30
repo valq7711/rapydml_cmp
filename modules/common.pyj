@@ -66,6 +66,9 @@ def v_meth(name_or_fun):
 def v_computed(name_or_fun):
     return _reg_as(name_or_fun, '_vue_computed')
 
+def v_filter(name_or_fun):
+    return _reg_as(name_or_fun, '_vue_filter')
+
 def v_watch(name_or_fun):
     return _reg_as(name_or_fun, '_vue_watch')
 
@@ -103,6 +106,7 @@ class RS_react:
             _vue_meth: 'methods', 
             _vue_computed: 'computed',
             _vue_watch: 'watch',
+            _vue_filter: 'filters',
             _vue_rstore_mutation: 'mutations',
             _vue_rstore_action: 'actions'
     }
