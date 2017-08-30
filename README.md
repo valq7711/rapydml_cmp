@@ -201,7 +201,7 @@ class V_hello(RS_vue):
     def __init__(self):
         # !!! ES6 issue:  in fact, `self` (i.e. `this`) doesn't exist yet !!! 
         # reference `this` is allowed only after `super()` - i.e. `Base_class.__init__()` - call:  
-        RS_react.__init__(self) 
+        RS_vue.__init__(self) 
         self.template = @TMPL(v_hello_tmpl)
         self.delimiters = ['${','}']
         self.props =  {
