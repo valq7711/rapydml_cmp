@@ -241,5 +241,70 @@ which is the same as:
 bar['_vue_computed']  = 'foo'
 ```
 thus, the `bar` will be registered as `foo` and in the vue-component context only `foo` will exist (which is `bar` in fact)
+Here is an example of the grid-component that was converted from [original one](https://vuejs.org/v2/examples/grid-component.html)
+```python
+#----------------------  < RS_SCRIPT > -------------------------
+from rs_vue import v_filter, v_meth, v_computed, v_watch, RS_vue
 
-  *to be continued ...*
+class Grid(RS_vue):
+    def __init__(self):
+        RS_vue.__init__(self)
+        self.delimiters = ['${','}']
+        self.template = @TMPL(grid_template)
+        self.props =  {
+            data: Array,
+            columns: Array,
+            filterKey: String
+        }
+    
+    def _init_data(self):
+        sortOrders = {col_name : 1 for col_name in self.columns}
+        return {  sortKey: '',
+                  sortOrders: sortOrders
+        }
+    
+    @v_computed
+    def filteredData(self):
+        sortKey = self.sortKey
+        filterKey = self.filterKey and self.filterKey.toLowerCase()
+        order = self.sortOrders[sortKey] or 1
+        data = self.data
+        if filterKey:
+            ...
+        if sortKey:
+            ...
+        return data
+
+    @v_filter    
+    def capitalize(self, str):
+        return str[0].toUpperCase() + str[1:]
+    
+    @v_meth
+    def sortBy(self, key):
+        self.sortKey = key
+        self.sortOrders[key] = self.sortOrders[key] * -1
+    
+    @v_watch
+    def $w_filteredData(self, v, v_was):
+        print('watcher: filteredData changed')
+    
+    @staticmethod
+    def make():
+        return Grid()
+
+def  main():
+    if not window.my_vcs:
+        window.my_vcs = {}
+    window.my_vcs.grid = Grid
+
+if __name__ = '__main__':
+    main()   
+```
+Note that 'watcher' (that watches for 'computed') has a special prefix `$w_` to prevent names conflict, since they are both methods (of the class). The alias may be applied instead of this trick:
+```python
+    @v_watch('filteredData')
+    def whatever(self, v, v_was):
+        ...
+```
+
+*to be continued ...*  
