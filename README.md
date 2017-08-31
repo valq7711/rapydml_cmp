@@ -241,7 +241,7 @@ which is the same as:
 bar['_vue_computed']  = 'foo'
 ```
 thus, the `bar` will be registered as `foo` and in the vue-component context only `foo` will exist (which is `bar` in fact)  
-Here is an example of the grid-component that was converted from [original one](https://vuejs.org/v2/examples/grid-component.html)
+Here is an example of the [grid-component](https://github.com/valq7711/rapydml_cmp/blob/master/examples/rs_grid) that was converted from [original one](https://vuejs.org/v2/examples/grid-component.html)
 ```python
 #----------------------  < RS_SCRIPT > -------------------------
 from rs_vue import v_filter, v_meth, v_computed, v_watch, RS_vue
