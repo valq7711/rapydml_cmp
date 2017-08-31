@@ -230,7 +230,7 @@ items_count['_vue_computed']  = 'items_count'
 self.computed = {}
 self.computed[ self.items_count['_vue_computed'] ] = self.items_count
 ```
-The decorators can accepts an alias name:
+The decorators can accept an alias name:
 ```python
 @v_computed('foo') 
 def bar(self):
