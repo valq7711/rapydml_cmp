@@ -1,0 +1,125 @@
+# Converted form https://vuejs.org/v2/examples/grid-component.html
+RS = code_block( script(type = 'text/javascript'), 'rapydscript')
+#---------------------  demo-test.html ---------------   
+html:
+    head:
+        meta(charset='utf-8'):
+        link(rel="stylesheet" type="text/css" href= "grid.css"):
+        script(src='vue.js'):
+        script(src='rs_grid.js'):
+        title:
+            "demo rs_grid.js"
+    body: 
+        div(style= "margin-bottom: 15px"):
+            a(href = 'https://vuejs.org/v2/examples/grid-component.html'):
+                'Vue original example'
+        
+        #---- demo template starts here ----------            
+
+        div(id = "demo"):
+            form(id = "search"):
+                'Search'
+                input( name="query", v-model = "searchQuery"):
+            grid(   :data = "gridData", \
+                    :columns = "gridColumns", \
+                    :filter-key ="searchQuery"):
+
+    #--------------- bootstrup the demo --------------------
+    RS:
+        window.grid = new Vue({
+          el: '#demo',
+          delimiters : ['${','}'],
+          components: {'grid': my_vcs.grid.make()},
+          data: {
+            searchQuery: '',
+            gridColumns: ['name', 'power'],
+            gridData: [
+              { name: 'Chuck Norris', power: Infinity },
+              { name: 'Bruce Lee', power: 9000 },
+              { name: 'Jackie Chan', power: 7000 },
+              { name: 'Jet Li', power: 8000 }
+            ],
+          }
+        })
+
+#-------------------------  < TEMPLATES > ----------------------
+script( type = 'text/vuetemplate', id = "grid_template" ):
+    table():
+        thead():
+            tr():
+                th( v-for="key in columns", \ 
+                        @click="sortBy(key)", \
+                        :class="{ active: sortKey == key }"):
+                    '${ key | capitalize }'
+                    span( class="arrow", \
+                          :class="sortOrders[key] > 0 ? 'asc' : 'dsc'"):
+        tbody():
+            tr( v-for="entry in filteredData"):
+                td( v-for="key in columns"):
+                    '${entry[key]}'
+
+#----------------------  < RS_SCRIPT > -------------------------
+from rs_vue import v_filter, v_meth, v_computed, v_watch, RS_vue
+
+class Grid(RS_vue):
+    def __init__(self):
+        RS_vue.__init__(self)
+        self.delimiters = ['${','}']
+        self.template = @TMPL(grid_template)
+        self.props =  {
+            data: Array,
+            columns: Array,
+            filterKey: String
+        }
+    
+    def _init_data(self):
+        sortOrders = {col_name : 1 for col_name in self.columns}
+        return {  sortKey: '',
+                  sortOrders: sortOrders
+        }
+    
+    @v_computed
+    def filteredData(self):
+        sortKey = self.sortKey
+        filterKey = self.filterKey and self.filterKey.toLowerCase()
+        order = self.sortOrders[sortKey] or 1
+        data = self.data
+        if filterKey:
+            f_data = []
+            for row in data:
+                for col in row: 
+                    if filterKey in String(row[col]).toLowerCase():
+                        f_data.push(row) 
+            data =  f_data            
+        if sortKey:
+            def comparator(a, b):
+                if (a = a[sortKey]) == (b = b[sortKey]):
+                    return 0
+                return (a > b and 1 or -1) * order
+            data = data[:].sort(comparator)
+        return data
+
+    @v_filter    
+    def capitalize(self, str):
+        return str[0].toUpperCase() + str[1:]
+    
+    @v_meth
+    def sortBy(self, key):
+        self.sortKey = key
+        self.sortOrders[key] = self.sortOrders[key] * -1
+    
+    @v_watch
+    def $w_filteredData(self, v, v_was):
+        print('watcher: filteredData changed')
+    
+    @staticmethod
+    def make():
+        return Grid()
+
+def  main():
+    if not window.my_vcs:
+        window.my_vcs = {}
+    window.my_vcs.grid = Grid
+
+if __name__ = '__main__':
+    main()   
