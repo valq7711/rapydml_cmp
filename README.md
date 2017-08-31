@@ -217,5 +217,29 @@ class V_hello(RS_vue):
         return len(self.items)
 ...
 ```
-Much better, isn't it?  
+Much better, isn't it? 
+
+### How it works
+
+Decorator (like `@v_computed`) marks the function by `key:value`, that is equal to the assignment:
+```python
+items_count['_vue_computed']  = 'items_count'
+```
+`RS_vue.__init__()` collects marked functions into `methods`, `computed` and other vue-component hashes (see [rs_vue.pyj](https://github.com/valq7711/rapydml_cmp/blob/master/modules/rs_vue.pyj)), i.e. does the tedious job like:
+```python
+self.computed = {}
+self.computed[ self.items_count['_vue_computed'] ] = self.items_count
+```
+The decorators can accepts an alias name:
+```python
+@v_computed('foo') 
+def bar(self):
+   ...
+```  
+which is the same as:
+```python
+bar['_vue_computed']  = 'foo'
+```
+thus, the `bar` will be registered as `foo` and in the vue-component context only `foo` will exist (which is `bar` in fact)
+
   *to be continued ...*
