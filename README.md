@@ -240,7 +240,7 @@ which is the same as:
 ```python
 bar['_vue_computed']  = 'foo'
 ```
-thus, the `bar` will be registered as `foo` and in the vue-component context only `foo` will exist (which is `bar` in fact)
+thus, the `bar` will be registered as `foo` and in the vue-component context only `foo` will exist (which is `bar` in fact)  
 Here is an example of the grid-component that was converted from [original one](https://vuejs.org/v2/examples/grid-component.html)
 ```python
 #----------------------  < RS_SCRIPT > -------------------------
