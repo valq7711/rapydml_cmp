@@ -1,0 +1,200 @@
+RS = code_block( script(type = 'text/javascript'), 'rapydscript')
+#---------------------  demo-test.html ---------------   
+!doctype( html):
+html(data-framework="vue"):
+    head:
+        meta(charset='utf-8'):
+        script(src='vue.js'):
+        script(src='app.js'):
+        title:
+            "Vue.js • TodoMVC"
+        link( rel="stylesheet",  href="https://unpkg.com/todomvc-app-css@2.0.4/index.css"):
+        script( src="https://unpkg.com/director@1.2.8/build/director.js"):
+    body:
+        div(id = 'todoapp'):
+            todo( :todo_storage = 'todo_storage', :visibility = 'visibility'):
+
+        footer( class="info"):
+            p:
+                "Double-click to edit a todo"
+            p:
+                "Original written by"
+                a(href="http://evanyou.me"):
+                    "Evan You"
+    #--------------- demo bootstrap --------------------
+    RS:
+        todo_storage = new Vue(new rs_todo.todo_storage())
+        app_opt = {
+            el : '#todoapp', 
+            data :{
+                 todo_storage: todo_storage,
+                 visibility: 'all'
+            },
+            components : {'todo': rs_todo.todos_component.make()},
+        }
+        # for playing in console
+        window.todo_store= todo_storage
+        app = window.app = new Vue(app_opt)
+
+        # handle routing
+        def onHashChange():
+            visibility = window.location.hash.replace(/#\/?/, '')
+            if (visibility in rs_todo.todo_storage.get_filter_names()):
+                app.visibility = visibility
+            else: 
+                window.location.hash = ''
+                app.visibility = 'all'
+
+        window.addEventListener('hashchange', onHashChange)
+        onHashChange()
+
+#-------------------------  < TEMPLATES > ----------------------
+script( type = 'text/vuetemplate', id = "todos_templ" ):
+    section(class="todoapp"):
+        header(class="header"):
+            h1:
+                'todos'
+            input( class="new-todo", \
+                autofocus, \
+                autocomplete="off", \
+                placeholder="What needs to be done?" , \
+                v-model="newTodo" , \
+                @keyup.enter="addTodo"):
+
+        section( class="main", v-show="todos.length"):
+            input( class="toggle-all" , type="checkbox",  v-model="allDone"):
+            ul( class="todo-list"):
+                li(v-for="todo in filteredTodos", \
+                        class="todo", \
+                        :key="todo.id", \
+                        :class="{ completed: todo.completed, editing: todo == editedTodo }"):  
+                    div( class="view"):
+                        input( class="toggle", type="checkbox", v-model="todo.completed"):
+                        label( @dblclick="editTodo(todo)", v-text = 'todo.title' ):
+                        button( class="destroy", @click="removeTodo(todo)"):
+                    input( class="edit", type="text", \
+                              v-model = "todo.title", \
+                              v-todo-focus = "todo == editedTodo", \
+                              @blur = "doneEdit(todo)", \
+                              @keyup.enter = "doneEdit(todo)", \
+                              @keyup.esc = "cancelEdit(todo)"):
+
+        footer( class="footer" , v-show="todos.length"):
+            span( class="todo-count"):
+                strong(v-text = 'remaining' ):
+                '{{ remaining | pluralize }} left'
+            ul( class="filters"):
+                li():
+                    a(href = "#/all", :class="{ selected: visibility == 'all' }"):
+                        "All"
+                li():
+                    a(href = "#/active", :class="{ selected: visibility == 'active' }"):
+                        "Active"
+                li():
+                    a(href = "#/completed", :class="{ selected: visibility == 'completed' }"):
+                        "Completed"
+            button( class="clear-completed", @click="removeCompleted", v-show="todos.length > remaining"):
+                "Clear completed"
+
+            
+#----------------------  < RS_SCRIPT > -------------------------
+from modules.rs_vue import v_meth, v_computed, v_watch, v_filter, v_directive, RS_vue
+from todo_storage import Todo_storage
+
+class Todos(RS_vue):
+    def __init__(self):
+        RS_vue.__init__(self)
+        self.template = @TMPL(todos_templ)
+        self.props = {
+            todo_storage: Object,
+            visibility: {type: String, default: 'all'}
+        }
+        self.computed.allDone = {
+            get: self.allDone_get,
+            set: self.allDone_set
+        }
+    
+    def _init_data(self):
+        self.todo_storage.load()
+        return {
+            newTodo: '',
+            editedTodo: null
+        }
+
+    # a custom directive to wait for the DOM to be updated
+    # before focusing on the input field.
+    # https://vuejs.org/guide/custom-directive.html
+    @v_directive
+    @staticmethod
+    def TodoFocus(el, binding):
+        if binding.value: el.focus()
+
+    # computed properties
+    # https://vuejs.org/guide/computed.html
+    @v_computed
+    def todos(self):
+         return self.todo_storage.todos
+    
+    @v_computed
+    def filteredTodos(self):
+         return self.todo_storage.filters[self.visibility]()
+
+    @v_computed    
+    def remaining(self):
+        return len(self.todo_storage.filters.active())
+
+    # computed with getter/setter - see __init__()
+    def allDone_get(self):
+        return self.remaining == 0
+
+    def allDone_set(self, value):
+        for todo in self.todo_storage.filters.all():
+            todo.completed = value
+  
+    @v_filter
+    def pluralize(self, n):
+      return n == 1 ? 'item' : 'items'
+    
+    @v_meth
+    def addTodo(self):
+        if self.todo_storage.add(self.newTodo):
+            self.newTodo = ''
+
+    @v_meth
+    def removeTodo(self, todo):
+        self.todo_storage.remove(todo)
+
+    @v_meth
+    def editTodo(self, todo):
+        self.beforeEditCache = todo.title
+        self.editedTodo = todo
+
+    @v_meth
+    def doneEdit(self, todo):
+      if not self.editedTodo: return
+      self.editedTodo = None
+      todo.title = todo.title.trim()
+      if not todo.title:
+        self.removeTodo(todo)
+
+    @v_meth
+    def cancelEdit(self, todo):
+        self.editedTodo = None
+        todo.title = self.beforeEditCache
+
+    @v_meth
+    def removeCompleted(self):
+        self.todo_storage.remove_completed()
+    
+    @staticmethod
+    def make():
+        return Todos()
+
+def main():
+    # make accessible
+    window.rs_todo = {}
+    window.rs_todo.todo_storage = Todo_storage
+    window.rs_todo.todos_component = Todos
+    
+if __name__=='__main__':
+    main()    

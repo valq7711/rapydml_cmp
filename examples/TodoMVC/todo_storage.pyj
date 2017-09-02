@@ -1,0 +1,64 @@
+from modules.rs_vue import v_meth, v_computed, v_watch, v_filter, RS_vue
+
+class Todo_storage(RS_vue):
+    def __init__(self, storage_key):
+        RS_vue.__init__(self)
+        self.data = {
+            storage_key : storage_key or 'todos-vuejs-2.0',
+            todos: None,
+            uid : 0,
+        }
+   
+    # watch todos change for localStorage persistence
+    @v_watch({deep: True})
+    def todos(self, todos):
+        self.save()
+
+    @v_meth    
+    def load(self):
+        self.todos = JSON.parse(localStorage.getItem(self.storage_key) or '[]')
+        for index, todo in enumerate(self.todos):
+            todo.id = index
+        self.uid = len(self.todos)
+
+    @v_meth
+    def save(self):
+        localStorage.setItem(self.storage_key, JSON.stringify(self.todos))
+
+    @v_meth
+    def add(self, value):
+        value = value and value.trim()
+        if value:
+            self.todos.push({
+                id: self.uid,
+                title: value,
+                completed: False
+            })
+            self.uid += 1
+            return True
+
+    @v_meth
+    def remove(self, todo):
+        self.todos.splice(self.todos.indexOf(todo), 1)
+
+    @v_meth
+    def remove_completed(self):
+        self.todos = self.filters.active()
+
+    @v_computed
+    def filters(self):
+        return {
+            all: def(): 
+                return self.todos
+            ,
+            active: def():
+                return self.todos.filter(def(todo): return !todo.completed;)
+            ,
+            completed: def(): 
+                return self.todos.filter(def(todo): return todo.completed;)
+       }         
+
+    @staticmethod
+    def get_filter_names():
+        return Object.keys(Todo_storage.prototype.filters())
+
