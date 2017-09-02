@@ -29,11 +29,12 @@ def read_config():
                 [   os.path.normpath(cfg['node']),
                     os.path.normpath(cfg['rapydscript'])
                 ],
-                cfg['rs_options']
+                cfg['rs_options'],
+                cfg.get('ugly_template', False) 
         ]
         return ret
 
-RS_CMD, RS_OPT = read_config()
+RS_CMD, RS_OPT, UGLY_TEMPLATE = read_config()
 
 
 class ShellError(Exception):
@@ -135,10 +136,19 @@ def split_css(ml_templ):
 def insert_templ_css_tab(rs_s, templs):
     def templ_replacer(m):
         id = m.group(2)
+        ugly = m.group(3) or UGLY_TEMPLATE
         indent = ' '*(len(m.group(1)) + 4)
-        s = m.group(1) + '"""<!-- %s -->%s%s"""' % ( id,'\n'+indent, re.sub('\r\n|\n', '\n'+indent, templs[id]['templ']))
+        if ugly:
+            # place template in single long line  
+            beg = ''
+            templ = re.sub('\r\n|\n| +', ' ', templs[id]['templ'])
+        else:
+            # multiline template
+            beg = '\n'+indent                
+            templ = re.sub('\r\n|\n', '\n'+indent, templs[id]['templ'])
+        s = m.group(1) + '"""<!-- %s -->%s%s"""' % ( id, beg, templ)
         return s
-    ret  = re.sub('(^ *(?![#\s]).+)@TMPL\( *([a-z0-9_\-.]+) *\)', templ_replacer, rs_s,  flags = re.MULTILINE )
+    ret  = re.sub('(^ *(?![#\s]).+)@TMPL\( *([a-z0-9_\-.]+) *,? *(ugly)? *\)', templ_replacer, rs_s,  flags = re.MULTILINE )
 
     def css_replacer(m):
         id = m.group(2)
