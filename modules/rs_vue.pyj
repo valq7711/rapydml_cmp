@@ -51,7 +51,14 @@ def v_collect(from_obj, to_obj, map, redefine):
                 if not to_obj[hash_name]:
                     to_obj[hash_name] = {}
                 if to_obj[hash_name][reg_name] == undefined or redefine:
-                    to_obj[hash_name][reg_name] = from_obj[k]
+                    if hash_name == 'watch' and isinstance(reg_name, Object):
+                        watcher_name = reg_name.name or from_obj[k].name
+                        watcher_def = Object.assign({}, reg_name)
+                        del watcher_def.name
+                        watcher_def.handler = from_obj[k]
+                        to_obj[hash_name][watcher_name]  = watcher_def
+                    else:    
+                        to_obj[hash_name][reg_name] = from_obj[k]
                 else:
                     raise Error('"' + reg_name + '" already exists in "' + hash_name + '", try v_collect(..., redefine = true)' )
                 break
