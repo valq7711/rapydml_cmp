@@ -29,10 +29,6 @@ def v_directive(name_or_fun):
     return _reg_as(name_or_fun, '_vue_directive')
 
 def v_watch(name_or_fun):
-    if isinstance(name_or_fun, Function):
-        name = name_or_fun.name.split('$w_')[1]
-        if name:
-            return _reg_as(name, '_vue_watch')(name_or_fun)
     return _reg_as(name_or_fun, '_vue_watch')
 
 def v_rstore_getter(name_or_fun):
@@ -56,6 +52,8 @@ def v_collect(from_obj, to_obj, map, redefine):
                 if to_obj[hash_name][reg_name] == undefined or redefine:
                     if hash_name == 'watch' and isinstance(reg_name, Object):
                         watcher_name = reg_name.name or from_obj[k].name
+                        if watcher_name.startsWith('$w_'):
+                            watcher_name= watcher_name.substr(3)
                         watcher_def = Object.assign({}, reg_name)
                         del watcher_def.name
                         watcher_def.handler = from_obj[k]
