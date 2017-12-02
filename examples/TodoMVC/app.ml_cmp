@@ -25,12 +25,12 @@ html(data-framework="vue"):
     RS:
         todo_storage = new Vue(new rs_todo.todo_storage())
         app_opt = {
-            el : '#todoapp', 
-            data :{
-                 todo_storage: todo_storage,
-                 visibility: 'all'
+            'el' : '#todoapp', 
+            'data' :{
+                 'todo_storage': todo_storage,
+                 'visibility': 'all'
             },
-            components : {'todo': rs_todo.todos_component.make()},
+            'components' : { 'todo': rs_todo.todos_component.make()},
         }
         # for playing in console
         window.todo_store= todo_storage
@@ -106,19 +106,19 @@ class Todos(RS_vue):
         RS_vue.__init__(self)
         self.template = @TMPL(todos_templ)
         self.props = {
-            todo_storage: Object,
-            visibility: {type: String, default: 'all'}
+            'todo_storage': Object,
+            'visibility': {'type': String, 'default': 'all'}
         }
         self.computed.allDone = {
-            get: self.allDone_get,
-            set: self.allDone_set
+            'get': self.allDone_get,
+            'set': self.allDone_set
         }
     
     def _init_data(self):
         self.todo_storage.load()
         return {
-            newTodo: '',
-            editedTodo: null
+            'newTodo': '',
+            'editedTodo': None
         }
 
     # a custom directive to wait for the DOM to be updated
@@ -137,18 +137,18 @@ class Todos(RS_vue):
     
     @v_computed
     def filteredTodos(self):
-         return self.todo_storage.filters[self.visibility]()
+         return self.todo_storage.ffilters[self.visibility]()
 
     @v_computed    
     def remaining(self):
-        return len(self.todo_storage.filters.active())
+        return len(self.todo_storage.ffilters.active())
 
     # computed with getter/setter - see __init__()
     def allDone_get(self):
         return self.remaining == 0
 
     def allDone_set(self, value):
-        for todo in self.todo_storage.filters.all():
+        for todo in self.todo_storage.ffilters.all():
             todo.completed = value
   
     @v_filter

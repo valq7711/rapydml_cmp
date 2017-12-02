@@ -4,13 +4,13 @@ class Todo_storage(RS_vue):
     def __init__(self, storage_key):
         RS_vue.__init__(self)
         self.data = {
-            storage_key : storage_key or 'todos-vuejs-2.0',
-            todos: None,
-            uid : 0,
+            'storage_key' : storage_key or 'todos-vuejs-2.0',
+            'todos': None,
+            'uid' : 0,
         }
    
     # watch todos change for localStorage persistence
-    @v_watch({deep: True})
+    @v_watch({'deep': True})
     def todos(self, todos):
         self.save()
 
@@ -30,9 +30,9 @@ class Todo_storage(RS_vue):
         value = value and value.trim()
         if value:
             self.todos.push({
-                id: self.uid,
-                title: value,
-                completed: False
+                'id': self.uid,
+                'title': value,
+                'completed': False
             })
             self.uid += 1
             return True
@@ -46,19 +46,19 @@ class Todo_storage(RS_vue):
         self.todos = self.filters.active()
 
     @v_computed
-    def filters(self):
+    def ffilters(self):
         return {
-            all: def(): 
+            'all': def(): 
                 return self.todos
             ,
-            active: def():
+            'active': def():
                 return self.todos.filter(def(todo): return !todo.completed;)
             ,
-            completed: def(): 
+            'completed': def(): 
                 return self.todos.filter(def(todo): return todo.completed;)
        }         
 
     @staticmethod
     def get_filter_names():
-        return Object.keys(Todo_storage.prototype.filters())
+        return Object.keys(Todo_storage.prototype.ffilters())
 
