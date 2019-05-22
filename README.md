@@ -1,4 +1,6 @@
 
+## This project is outdated, look at this [one!](https://github.com/valq7711/vue2pyj)
+
 rapydml_cmp
 ===========
 Vue-components generator
